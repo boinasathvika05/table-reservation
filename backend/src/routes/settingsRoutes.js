@@ -7,5 +7,6 @@ const router = express.Router();
 
 router.get('/', protect, getSettings);
 router.put('/', protect, adminOnly, settingsValidator, updateSettings);
+router.post('/reset', protect, adminOnly, require('../controllers/settingsController').resetSettings);
 
 module.exports = router;

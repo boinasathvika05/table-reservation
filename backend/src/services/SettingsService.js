@@ -11,6 +11,12 @@ class SettingsService {
     logger.info('SettingsService: Global restaurant settings updated.');
     return updated;
   }
+
+  async resetSettings() {
+    const reset = await SettingsRepository.resetSettings();
+    logger.info('SettingsService: Global restaurant settings reset to default.');
+    return reset;
+  }
 }
 
 module.exports = new SettingsService();

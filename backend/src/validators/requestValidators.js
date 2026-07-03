@@ -120,6 +120,36 @@ const settingsValidator = [
   body('averageSpendPerGuest')
     .optional()
     .isFloat({ min: 0 }).withMessage('Average spend cannot be negative'),
+  body('holidayDates')
+    .optional()
+    .isArray().withMessage('Holiday dates must be an array of strings')
+    .custom((val) => {
+      if (val && !val.every(date => /^\d{4}-\d{2}-\d{2}$/.test(date))) {
+        throw new Error('Holiday dates must be in YYYY-MM-DD format');
+      }
+      return true;
+    }),
+  body('weekendRestrictions')
+    .optional()
+    .isBoolean().withMessage('Weekend restrictions must be a boolean'),
+  body('currency')
+    .optional()
+    .isString().withMessage('Currency must be a string'),
+  body('enableTableJoining')
+    .optional()
+    .isBoolean().withMessage('Enable table joining must be a boolean'),
+  body('maxTablesPerReservation')
+    .optional()
+    .isInt({ min: 1 }).withMessage('Max tables per reservation must be at least 1'),
+  body('enableEmailNotifications')
+    .optional()
+    .isBoolean().withMessage('Enable email notifications must be a boolean'),
+  body('enableBookingReminders')
+    .optional()
+    .isBoolean().withMessage('Enable booking reminders must be a boolean'),
+  body('enableCancellationNotifications')
+    .optional()
+    .isBoolean().withMessage('Enable cancellation notifications must be a boolean'),
   validateResult
 ];
 

@@ -25,6 +25,8 @@ const AdminDashboard = () => {
 
   const { showToast } = useToast();
 
+  const [settings, setSettings] = useState(null);
+
   const loadDashboardData = useCallback(async () => {
     setLoading(true);
     try {
@@ -40,7 +42,13 @@ const AdminDashboard = () => {
         setTables(tablesRes.data.tables);
       }
 
-      // 3. Fetch Paginated & Filtered Reservations
+      // 3. Fetch Settings (for currency symbol)
+      const settingsRes = await api.get('/settings');
+      if (settingsRes.success) {
+        setSettings(settingsRes.data.settings);
+      }
+
+      // 4. Fetch Paginated & Filtered Reservations
       const queryParams = new URLSearchParams({
         page,
         limit,
@@ -126,7 +134,7 @@ const AdminDashboard = () => {
               <span>Estimated Revenue</span>
               <DollarSign size={18} />
             </div>
-            <div className="stat-value">${stats.basic.estimatedRevenue}</div>
+            <div className="stat-value">{settings?.currency || '$'}{stats.basic.estimatedRevenue}</div>
             <div className="stat-footer">Based on average spend per guest</div>
           </div>
 
@@ -318,7 +326,7 @@ const AdminDashboard = () => {
                     </td>
                     <td>{res.guests}</td>
                     <td>{res.tables.map(t => t.number).join(', ')}</td>
-                    <td style={{ fontWeight: 700 }}>${res.estimatedRevenue}</td>
+                    <td style={{ fontWeight: 700 }}>{settings?.currency || '$'}{res.estimatedRevenue}</td>
                     <td>
                       <span className={`badge badge-${res.status}`}>{res.status}</span>
                     </td>

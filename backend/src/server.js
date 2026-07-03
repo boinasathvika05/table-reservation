@@ -20,7 +20,12 @@ const startServer = async () => {
     // 1. Connect to Database
     await connectDB();
 
-    // 2. Initialize Background Cron Scheduler
+    // 2. Initialize Settings if not exist
+    const SettingsRepository = require('./repositories/SettingsRepository');
+    await SettingsRepository.getSettings();
+    logger.info('✓ Restaurant Configurations Initialized');
+
+    // 3. Initialize Background Cron Scheduler
     startScheduler();
     logger.info('✓ Cron Started');
 

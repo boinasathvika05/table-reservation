@@ -88,6 +88,32 @@ const SettingsSchema = new mongoose.Schema(
     weekendRestrictions: {
       type: Boolean,
       default: false
+    },
+    currency: {
+      type: String,
+      default: 'USD',
+      trim: true
+    },
+    enableTableJoining: {
+      type: Boolean,
+      default: true
+    },
+    maxTablesPerReservation: {
+      type: Number,
+      default: 2,
+      min: [1, 'Must allow at least 1 table per reservation']
+    },
+    enableEmailNotifications: {
+      type: Boolean,
+      default: true
+    },
+    enableBookingReminders: {
+      type: Boolean,
+      default: true
+    },
+    enableCancellationNotifications: {
+      type: Boolean,
+      default: true
     }
   },
   {

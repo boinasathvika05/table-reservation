@@ -19,6 +19,12 @@ class SettingsRepository {
     Object.assign(settings, settingsData);
     return await settings.save();
   }
+
+  async resetSettings() {
+    await Settings.deleteMany({});
+    const settings = await Settings.create({});
+    return settings;
+  }
 }
 
 module.exports = new SettingsRepository();

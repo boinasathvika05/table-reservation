@@ -105,7 +105,36 @@ const timeToMinutes = (timeStr) => {
 };
 
 const allocateTables = ({ guests, date, startTime, allTables, activeReservations, settings }) => {
-  const { reservationDuration, bufferTimeMinutes, openingHour, closingHour } = settings;
+  const { 
+    reservationDuration, 
+    bufferTimeMinutes, 
+    openingHour, 
+    closingHour,
+    holidayDates,
+    weekendRestrictions,
+    enableTableJoining,
+    maxTablesPerReservation
+  } = settings;
+
+  // Validate Holiday restrictions
+  if (holidayDates && holidayDates.includes(date)) {
+    const err = new Error(`The requested date (${date}) is a public holiday and closed for bookings.`);
+    err.code = 'HOLIDAY_RESTRICTION';
+    err.statusCode = 400;
+    throw err;
+  }
+
+  // Validate Weekend restrictions
+  if (weekendRestrictions) {
+    const dayOfWeek = new Date(date).getDay();
+    // 0 = Sunday, 6 = Saturday
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      const err = new Error('Weekend reservations are currently disabled.');
+      err.code = 'WEEKEND_RESTRICTION';
+      err.statusCode = 400;
+      throw err;
+    }
+  }
 
   // Validate operational hours using minutes from midnight
   const startMins = timeToMinutes(startTime);
@@ -168,16 +197,22 @@ const allocateTables = ({ guests, date, startTime, allTables, activeReservations
     };
   }
 
-  // 3. Try table joining combination search
-  const optimalCombination = findOptimalCombination(freeTables, guests);
-  if (optimalCombination && optimalCombination.length > 0) {
-    const tableNumbers = optimalCombination.map(t => t.number).join(', ');
-    logger.info(`Engine: Allocated joined tables [${tableNumbers}] (combined capacity ${optimalCombination.reduce((acc, t) => acc + t.capacity, 0)}) for ${guests} guests.`);
-    return {
-      tables: optimalCombination,
-      joined: true,
-      endTime: calculateEndTime(startTime, reservationDuration)
-    };
+  // 3. Try table joining combination search (if enabled)
+  if (enableTableJoining) {
+    const optimalCombination = findOptimalCombination(freeTables, guests);
+    if (optimalCombination && optimalCombination.length > 0) {
+      if (optimalCombination.length <= maxTablesPerReservation) {
+        const tableNumbers = optimalCombination.map(t => t.number).join(', ');
+        logger.info(`Engine: Allocated joined tables [${tableNumbers}] (combined capacity ${optimalCombination.reduce((acc, t) => acc + t.capacity, 0)}) for ${guests} guests.`);
+        return {
+          tables: optimalCombination,
+          joined: true,
+          endTime: calculateEndTime(startTime, reservationDuration)
+        };
+      } else {
+        logger.warn(`Engine: Table combination required ${optimalCombination.length} tables, which exceeds the maximum limit of ${maxTablesPerReservation}.`);
+      }
+    }
   }
 
   // 4. No tables fit
