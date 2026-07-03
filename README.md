@@ -5,8 +5,7 @@ A production-ready full-stack Restaurant Reservation Management System built usi
 🚀 Live Demo
 
 Frontend + Backend
-
-https://your-render-url.onrender.com
+https://table-reservation-internship.onrender.com
 📂 GitHub Repository
 https://github.com/boinasathvika05/table-reservation
 📖 Project Overview
